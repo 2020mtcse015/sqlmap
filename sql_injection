@@ -1,0 +1,28 @@
+This is a simple SQL injection attack based on user input. The attacker uses a form that requires first name and last name as inputs. The attacker inputs:
+
+First name: malicious’ex
+Last name: Smith
+The SQL statement that processes the form inputs looks like this:
+
+select id, firstname, lastname from authors
+
+Once the attacker injects a malicious expression into the first name, the statement looks like this:
+
+select id, firstname, lastname from authors where firstname = 'malicious'ex' and lastname ='newman'
+
+The database identifies incorrect syntax due to the single apostrophe, and tries to execute the malicious statement.
+
+Here is code from OWASP showing how to prevent this attack, by sanitizing the input. 
+
+String firstname = req.getParameter("firstname");
+String lastname = req.getParameter("lastname");
+String query = "SELECT id, firstname, lastname FROM authors WHERE firstname = ? and lastname = ?";
+// Using a PreparedStatement to take the user’s query and sanitize it 
+// by setting it as a string, instead of directly passing it to DB
+PreparedStatement pstmt = connection.prepareStatement( query );
+pstmt.setString( 1, firstname );
+pstmt.setString( 2, lastname );
+try
+{
+    ResultSet results = pstmt.execute( );
+}
